@@ -151,7 +151,7 @@ If the environment variable is invalid or empty, the application falls back to t
 
 Deploy ImpowerRetro to Railway with one click:
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/YOUR_TEMPLATE_ID?referralCode=6X4KFq)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/LZBVj9?referralCode=6X4KFq)
 
 The template automatically sets up:
 - The ImpowerRetro web application
