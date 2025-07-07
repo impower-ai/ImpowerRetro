@@ -1,0 +1,180 @@
+﻿@page "/Session/{SessionID}"
+@using ImpowerRetro.Components.Controls
+@using ImpowerRetro.Components.Model
+@using ImpowerRetro.Components.Utilities
+@using ImpowerRetro.Services
+@inject IJSUtilityService JSUtilityService
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject ISessionService SessionService
+@inject IMemoryService MemoryService
+
+<PageTitle>ImpowerRetro Retrospective Session</PageTitle>
+
+<FloatingReaction @ref="FloatingReaction" MaxReactions="15" AnimationDuration="4000"/>
+
+@* ### Floating Settings Button ### *@
+<div class="floating-settings-button">
+    <RadzenButton Icon="settings"
+                  ButtonStyle="ButtonStyle.Primary"
+                  Variant="Variant.Filled"
+                  Size="ButtonSize.Large"
+                  Click="@OpenSettingsFlyout"
+                  class="@($"{Constants.Styles.GlassControlPanel} settings-fab")"
+                  Style="border-radius: 50%; width: 56px; height: 56px; padding: 0;"/>
+</div>
+
+@if (CurrentSession != null && !string.IsNullOrEmpty(MemoryService.UserInfo?.UserName))
+{
+    @* ### Topic (if any) ### *@
+    @if (!string.IsNullOrWhiteSpace(CurrentSession.Topic))
+    {
+        <div class="@($"{Constants.Styles.RetroSessionHeader} {Constants.Styles.GlassAnimateIn}")">
+            <RadzenStack JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                <RadzenText Text="Topic: "/>
+                <RadzenText Text="@CurrentSession.Topic"/>
+            </RadzenStack>
+        </div>
+    }
+
+    @* ### SessionControls ### *@
+    <RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+        @if (IsOwner)
+        {
+            <RadzenColumn Size="8">
+                <SessionControls
+                    IsHidden="@IsHidden"
+                    TimerRunning="@TimerRunning"
+                    IsWrapUp="@(CurrentColumnIndex >= CurrentSession.Template.Columns.Count)"
+                    SendReactionFunc="@(emoji => SendReaction(emoji))"
+                    ToggleHiddenMode="@ToggleHiddenMode"
+                    ToggleTimer="@ToggleTimer"
+                    ExportSession="@ExportSession"
+                    EndSession="@EndSession"/>
+            </RadzenColumn>
+        }
+        @* ### React & Share ### *@
+        <RadzenColumn Size="4">
+            <RadzenCard class="@Constants.Styles.GlassControlPanel" Style="@Constants.Styles.FlexGrowCol">
+                <RadzenStack Orientation="Orientation.Horizontal" Style="@Constants.Styles.FlexGrowCol">
+                    <RadzenSplitButton @ref="@ReactButton" Text="React" AlwaysOpenPopup="true" Icon="add_reaction" Click="@(args => SendReaction(args.Value))" Style="@Constants.Styles.FlexGrowRow">
+                        <ChildContent>
+                            <RadzenStack Style="margin: 0px;" Gap="0">
+                                @foreach (var kvp in Constants.UI.EmojiDictionary)
+                                {
+                                    <RadzenSplitButtonItem Icon="@kvp.Value.Item2" Text="@kvp.Value.Item1" Value="@kvp.Key" Style="margin: 0px;"/>
+                                }
+                            </RadzenStack>
+                        </ChildContent>
+                    </RadzenSplitButton>
+                    <RadzenSplitButton Text="Share" AlwaysOpenPopup="true" Icon="share" Click="@(args => CopyToClipboard(args))" Style="@Constants.Styles.FlexGrowRow">
+                        <ChildContent>
+                            <RadzenSplitButtonItem Text="Copy Session Link" Icon="link" Value="Link"/>
+                            <RadzenSplitButtonItem Text="Copy Session ID" Icon="fingerprint" Value="ID"/>
+                        </ChildContent>
+                    </RadzenSplitButton>
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenColumn>
+    </RadzenRow>
+    @* ### Steps & Columns ### *@
+    <RadzenRow Style="height: 100%">
+        <RadzenColumn>
+            <RadzenSteps @ref="@Steps" Change="@OnStepsIndexChange" AllowStepSelect="IsOwner" ShowStepsButtons="IsOwner" @bind-SelectedIndex="@CurrentColumnIndex">
+                <Steps>
+                    @foreach (var column in CurrentSession.Template.Columns)
+                    {
+                        <RadzenStepsItem Text="@column">
+                            <RadzenRow Style="height: 100%; min-height: 600px;">
+                                <RadzenColumn Size="@(IsOwner ? 8 : 12)" Style="min-height: 600px; display: flex; flex-direction: column;">
+                                    @* ### ChatBox ### *@
+                                    <RadzenStack Style="@Constants.Styles.FlexGrowCol">
+                                        <RadzenCard class="@Constants.Styles.GlassSessionContainer" Style="@Constants.Styles.FlexGrowCol">
+                                            @if (SessionService.GetItems(SessionID, column).Count == 0)
+                                            {
+                                                <RadzenText Style="@Constants.Styles.FlexGrowCol" Text="Nothing yet, be the first!"/>
+                                            }
+                                            else
+                                            {
+                                                <ChatBox IsOwner="@IsOwner" IsHidden="@IsHidden" IsWrapUp="false"
+                                                         CopyAsNoteFunc="@(input => AppendToNote(input))"
+                                                         Data="@SessionService.GetItems(SessionID, column)"/>
+                                            }
+                                            @if (TimerRunning)
+                                            {
+                                                <div class="@Constants.Styles.RetroTimerDisplay">
+                                                    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="0.25rem" Style="text-transform: none;">
+                                                        <RadzenIcon Icon="timer"/>
+                                                        Time Remaining: @FormatTimeSpan(RemainingTime)
+                                                    </RadzenStack>
+                                                </div>
+                                            }
+                                        </RadzenCard>
+                                        @* ### User Input ### *@
+                                        <RadzenTemplateForm TItem="UserInput" Data="@Input" Submit="@OnInputSubmit" InvalidSubmit="@OnInvalidInputSubmit">
+                                            <RadzenCard class="@Constants.Styles.GlassContent">
+                                                <RadzenStack>
+                                                    <RadzenFormField Text="What do you think?">
+                                                        <RadzenTextBox Name="txtInput" @bind-Value="@Input.Content"/>
+                                                        <RadzenRequiredValidator Component="txtInput" Text="" Style="position: absolute"/>
+                                                    </RadzenFormField>
+                                                    <RadzenButton Text="Share" Icon="keyboard_return" Variant="Variant.Outlined" ButtonType="ButtonType.Submit"/>
+                                                </RadzenStack>
+                                            </RadzenCard>
+                                        </RadzenTemplateForm>
+                                    </RadzenStack>
+                                </RadzenColumn>
+                                @* ### Notes (Action Items) ### *@
+                                @if (IsOwner)
+                                {
+                                    <RadzenColumn Style="display: flex; flex-direction: column;">
+                                        <RadzenCard class="@Constants.Styles.GlassContent" Style="@Constants.Styles.FlexGrowCol">
+                                            <RadzenTextArea Style="flex-grow: 1; width:100%; height:100%; display: flex; flex-direction: column; resize: none;" @bind-Value="@ColumnNote"/>
+                                            <RadzenAlert AlertStyle="AlertStyle.Info" AllowClose="false" Style="margin-bottom: 0px;">
+                                                Notes save automatically
+                                            </RadzenAlert>
+                                        </RadzenCard>
+                                    </RadzenColumn>
+                                }
+                            </RadzenRow>
+                        </RadzenStepsItem>
+                    }
+                    @* ### Wrap Up ### *@
+                    <RadzenStepsItem Text="@CurrentSession.WrapUpColumn">
+                        <RadzenRow JustifyContent="JustifyContent.Center">
+                            <RadzenColumn Size="6" Style="min-height: 600px; display: flex; flex-direction: column;">
+                                @* ### ChatBox ### *@
+                                <RadzenStack Style="@Constants.Styles.FlexGrowCol">
+                                    <RadzenCard class="@Constants.Styles.GlassSessionContainer" Style="@Constants.Styles.FlexGrowCol">
+                                        @if (CurrentSession.WrapUpItems.Count == 0)
+                                        {
+                                            <RadzenText Text="No wrap-up items yet. Add your final thoughts!"/>
+                                        }
+                                        else
+                                        {
+                                            <ChatBox IsOwner="@IsOwner" IsHidden="@IsHidden" IsWrapUp="true"
+                                                     Data="@CurrentSession.WrapUpItems"/>
+                                        }
+                                    </RadzenCard>
+                                    @* ### User Input ### *@
+                                    <RadzenTemplateForm TItem="UserInput" Data="@WrapUpInput" Submit="@OnWrapUpInputSubmit" InvalidSubmit="@OnInvalidWrapUpInputSubmit">
+                                        <RadzenCard class="@Constants.Styles.GlassContent">
+                                            <RadzenStack>
+                                                <RadzenFormField Text="What do you think?">
+                                                    <RadzenTextBox Name="txtWrapUpInput" @bind-Value="@WrapUpInput.Content"/>
+                                                    <RadzenRequiredValidator Component="txtWrapUpInput" Text="" Style="position: absolute"/>
+                                                </RadzenFormField>
+                                                <RadzenButton Text="Share" Icon="keyboard_return" Variant="Variant.Outlined" ButtonType="ButtonType.Submit"/>
+                                            </RadzenStack>
+                                        </RadzenCard>
+                                    </RadzenTemplateForm>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenStepsItem>
+                </Steps>
+            </RadzenSteps>
+        </RadzenColumn>
+    </RadzenRow>
+}

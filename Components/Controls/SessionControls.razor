@@ -1,0 +1,65 @@
+﻿@using ImpowerRetro.Components.Utilities
+<RadzenCard class="@Constants.Styles.GlassControlPanel" Style="@Constants.Styles.FlexGrowColSimple">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Style="@Constants.Styles.FlexGrowColSimple" Gap="0.5rem">
+        @if (!IsWrapUp)
+        {
+            <RadzenButton Text="@(IsHidden ? "Hidden" : "Visible")" Click="@ToggleHiddenMode" Style="@HiddenToggleColorStyle" Icon="@(IsHidden ? "visibility_off" : "visibility")"/>
+            <RadzenSplitButton Text="@(TimerRunning ? "Stop Timer" : "Start Timer")" AlwaysOpenPopup="@(!TimerRunning)" Icon="timer" Click="@ToggleTimer" Style="@ButtonColorStyle">
+                @if (!TimerRunning)
+                {
+                    <RadzenSplitButtonItem Text="1 Minute" Icon="counter_1" Value="1"/>
+                    <RadzenSplitButtonItem Text="2 Minutes" Icon="counter_2" Value="2"/>
+                    <RadzenSplitButtonItem Text="3 Minutes" Icon="counter_3" Value="3"/>
+                    <RadzenSplitButtonItem Text="5 Minutes" Icon="counter_5" Value="5"/>
+                    <RadzenSplitButtonItem Text="10 Minutes" Icon="timer_10" Value="10"/>
+                }
+            </RadzenSplitButton>
+            <RadzenSplitButton Text="React" AlwaysOpenPopup="true" Icon="add_reaction" Click="@(args => SendReaction(args.Icon))" Style="@ButtonColorStyle">
+                <ChildContent>
+                    <RadzenSplitButtonItem Icon="stars" Text="Stars"/>
+                    <RadzenSplitButtonItem Icon="celebration" Text="Celebration"/>
+                </ChildContent>
+            </RadzenSplitButton>
+        }
+        else
+        {
+            <RadzenButton Text="Export Session" Icon="cloud_download" Click="@ExportSession" Style="@ButtonColorStyle"/>
+            <RadzenButton Text="End Session" ButtonStyle="ButtonStyle.Warning" Icon="logout" Click="@EndSession" Style="@ButtonColorStyle"/>
+        }
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+
+    [Parameter]
+    public bool IsWrapUp { get; set; }
+
+    [Parameter]
+    public bool IsHidden { get; set; }
+
+    [Parameter]
+    public bool TimerRunning { get; set; }
+
+    [Parameter]
+    public EventCallback ToggleHiddenMode { get; set; }
+
+    [Parameter]
+    public Action<string> SendReactionFunc { get; set; }
+
+    [Parameter]
+    public EventCallback ExportSession { get; set; }
+
+    [Parameter]
+    public EventCallback EndSession { get; set; }
+
+    [Parameter]
+    public EventCallback<RadzenSplitButtonItem> ToggleTimer { get; set; }
+
+    private void SendReaction(string text)
+    {
+        SendReactionFunc?.Invoke(text);
+    }
+
+    private string HiddenToggleColorStyle => Constants.Styles.FlexGrowRowSimple + $"min-width: 160px; background-color: {(IsHidden ? "#096AF2" : "#F26C1F")}; color: white;";
+    private string ButtonColorStyle => Constants.Styles.FlexGrowRowSimple + "min-width: 200px;";
+}

@@ -1,0 +1,92 @@
+@page "/"
+@using ImpowerRetro.Components.Model
+@using ImpowerRetro.Components.Utilities
+@using ImpowerRetro.Services
+
+@inject IJSUtilityService JSUtilityService
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject IMemoryService MemoryService
+@inject ILogService LogService
+
+<PageTitle>ImpowerRetro</PageTitle>
+<RadzenRow>
+    <RadzenColumn>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" class="logo-header-stack">
+            <RadzenImage Path="images/ImpowerLogo.png" Style="width: 25rem;"/>
+            <RadzenText Text="Retro" TextStyle="TextStyle.H4"/>
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+    <RadzenColumn>
+        <div class="@Constants.Styles.GlassContent">
+            <RadzenText Text="Privacy-Focused Team Retrospectives" TextStyle="TextStyle.DisplayH2" TagName="TagName.Auto" Style="font-style: normal; font-weight: bold; font-size: 20px"></RadzenText>
+            <ul class="list-disc pl-5 space-y-2">
+                <li>Customizable retrospective format with pre-set templates</li>
+                <li>No registration required - just enter a username and start</li>
+                <li>Zero data storage - everything is deleted after your session</li>
+                <li>Hidden mode for unbiased input</li>
+                <li>Real-time collaboration with easy idea sharing</li>
+                <li>Built-in timer for time-boxed discussions</li>
+                <li>Emoji reactions and special effects for engagement</li>
+                <li>Note-taking capabilities for facilitators</li>
+                <li>Export retrospective as an HTML report</li>
+                <li>Session controls for retrospective owners</li>
+                <li>Clean, user-friendly interface with optional background animations</li>
+                <li>Accessibility features including high-contrast mode</li>
+                <li>Responsive design for desktop and mobile use</li>
+                <li>Perfect for teams of all experience levels</li>
+            </ul>
+            <p class="mt-4 font-semibold">Start your improved retrospectives now - no sign-up, no fuss!</p>
+        </div>
+    </RadzenColumn>
+    <RadzenColumn>
+        <RadzenStack Orientation="Orientation.Horizontal">
+            @* ### Create Session ### *@
+            <RadzenCard class="@($"{Constants.Styles.RetroWelcomeCard} {Constants.Styles.GlassAnimateIn}")" Style="@Constants.Styles.CenterCard">
+                <RadzenIcon Icon="start" Style="@Constants.Styles.IconLarge"/>
+                <div Style="@Constants.Styles.FlexGrowCol">
+                    <RadzenStack JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenText Text="Create a fresh retrospective space" TextStyle="TextStyle.H6" TagName="TagName.H3" Style="margin-bottom: 0.5rem;"/>
+                        <RadzenText Text="Invite your team to reflect and improve together." TextStyle="TextStyle.Body1" TagName="TagName.P"/>
+                    </RadzenStack>
+                </div>
+                <RadzenButton Text="Start New Retrospective" Click="@(() => ShowSessionDialog(DialogModes.CreateSession))" Icon="east" Style="@Constants.Styles.FullWidth"/>
+            </RadzenCard>
+            @* ### Join Session ### *@
+            <RadzenCard class="@($"{Constants.Styles.RetroWelcomeCard} {Constants.Styles.GlassAnimateIn}")" Style="@Constants.Styles.CenterCard">
+                <RadzenIcon Icon="join" Style="@Constants.Styles.IconLarge"/>
+                <div Style="@Constants.Styles.FlexGrowCol">
+                    <RadzenStack JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenText Text="Join an existing retrospective session" TextStyle="TextStyle.H6" TagName="TagName.H3" Style="margin-bottom: 0.5rem;"/>
+                        <RadzenText Text="Connect with your team using a session ID." TextStyle="TextStyle.Body1" TagName="TagName.P"/>
+                    </RadzenStack>
+                </div>
+                <RadzenButton Text="Join Existing Retrospective" Click="@(() => ShowSessionDialog(DialogModes.JoinSession))" Icon="east" Style="@Constants.Styles.FullWidth"/>
+            </RadzenCard>
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>
+@* ### Links ### *@
+<RadzenRow Style="margin-top: 40px">
+    <RadzenColumn Size="12">
+        <RadzenRow>
+            <RadzenColumn Size="6">
+                <RadzenCard class="@($"{Constants.Styles.GlassContent} {Constants.Styles.GlassAnimateIn}")">
+                    <RadzenIcon Icon="code" Style="@Constants.Styles.IconLarge"/>
+                    <RadzenText Text="See the inner workings" TextStyle="TextStyle.DisplayH6" TagName="TagName.H3"></RadzenText>
+                    <RadzenLink Text="Impower GitHub" Path="https://github.com/impower-ai" Icon="east" Target="_blank" Style="font-size: 18px"/>
+                </RadzenCard>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenCard class="@($"{Constants.Styles.GlassContent} {Constants.Styles.GlassAnimateIn}")">
+                    <RadzenIcon Icon="people_outline" Style="@Constants.Styles.IconLarge"/>
+                    <RadzenText Text="Visit the creators" TextStyle="TextStyle.DisplayH6" TagName="TagName.H3"/>
+                    <RadzenLink Text="Impower.AI" Path="https://Impower.AI" Icon="east" Target="_blank" Style="font-size: 18px"/>
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenColumn>
+</RadzenRow>

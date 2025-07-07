@@ -1,0 +1,33 @@
+﻿@using ImpowerRetro.Services
+@inject ISessionService SessionService
+@inject NotificationService NotificationService
+@inject IMemoryService MemoryService
+
+<RadzenStack Gap="1rem">
+    <RadzenText TextStyle="TextStyle.H5">Session Information</RadzenText>
+    <RadzenStack>
+        <RadzenText TextStyle="TextStyle.Subtitle1">Active Users</RadzenText>
+        <RadzenListBox TValue="KeyValuePair<string, string>" Data="@ActiveUsers" TextProperty="Value" ValueProperty="Key" Disabled="true"/>
+    </RadzenStack>
+
+    <RadzenText TextStyle="TextStyle.H5">Session Settings</RadzenText>
+    <RadzenStack>
+        <RadzenText>Owner: @Session.CreatorID</RadzenText>
+        <RadzenText>Hidden Mode: @(Session.IsHidden ? "On" : "Off")</RadzenText>
+        <RadzenButton Text="Toggle Background Animations" Click="@ToggleAnimations"/>
+    </RadzenStack>
+
+    <RadzenText TextStyle="TextStyle.H5">Saved Defaults</RadzenText>
+    <RadzenStack>
+        <RadzenAlert AlertStyle="AlertStyle.Info" AllowClose="false">
+            These defaults are stored in your browser for convenience.
+            They are not sent to or stored on our servers.
+            You can clear them anytime for a fresh start.
+        </RadzenAlert>
+        <RadzenText>Username: @MemoryService.LocalStorage.UserName</RadzenText>
+        <RadzenText>Template: @MemoryService.LocalStorage.TemplateName</RadzenText>
+        <RadzenText>Topic: @MemoryService.LocalStorage.Topic</RadzenText>
+        <RadzenText>Background Animations: @MemoryService.LocalStorage.Animate</RadzenText>
+        <RadzenButton Text="Clear all Defaults" Click="@ClearLocalStorage" ButtonStyle="ButtonStyle.Danger"/>
+    </RadzenStack>
+</RadzenStack>

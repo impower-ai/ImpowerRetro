@@ -1,0 +1,50 @@
+﻿@using ImpowerRetro.Components.Model
+@using ImpowerRetro.Services
+@inject ISessionService SessionService
+@inject DialogService DialogService
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+@inject IMemoryService MemoryService
+@inject ILogService LogService
+
+<RadzenTemplateForm TItem="UserInfo" Data="@MemoryService.UserInfo" Submit="@OnSubmit" InvalidSubmit="@OnInvalidSubmit">
+    <RadzenCard>
+        <RadzenStack>
+            <RadzenFormField Text="Your Name">
+                <RadzenTextBox Name="txtUserName" @bind-Value="@MemoryService.UserInfo.UserName" Placeholder="Your Name"/>
+                <RadzenRequiredValidator Component="txtUserName" Text="" Style="position: absolute"/>
+                @if (Mode == DialogModes.JoinSession)
+                {
+                    <RadzenCustomValidator Component="txtUserName" Validator="@(() => !SessionService.IsUserNameTaken(MemoryService.UserInfo.SessionID, MemoryService.UserInfo.UserName))" Text="Name is already taken!" Style="position: absolute; top: 40px"/>
+                }
+            </RadzenFormField>
+
+            @if (Mode == DialogModes.CreateSession)
+            {
+                <RadzenFormField Text="Topic (optional)">
+                    <RadzenTextBox @bind-Value="@MemoryService.UserInfo.Topic"/>
+                </RadzenFormField>
+
+                <RadzenFormField Text="Template">
+                    <RadzenDropDown Name="ddTemplates" TValue="SessionTemplate" Data="@SessionService.Templates" TextProperty="@nameof(SessionTemplate.Name)" @bind-Value="@MemoryService.UserInfo.Template"/>
+                    <RadzenRequiredValidator Component="ddTemplates" Text="" Style="position: absolute"/>
+                </RadzenFormField>
+                <div class="rz-text-align-center">
+                    <RadzenCheckBox Name="chkRemember" @bind-Value="@Remember"/>
+                    <RadzenLabel Component="chkRemember" Text="Remember Information"/>
+                </div>
+            }
+            else
+            {
+                <RadzenFormField Text="SessionID">
+                    <RadzenTextBox Name="txtSessionID" @bind-Value="@MemoryService.UserInfo.SessionID" Placeholder="Session ID"/>
+                    <RadzenRequiredValidator Component="txtSessionID" Text="" Style="position: absolute"/>
+                </RadzenFormField>
+            }
+
+            <RadzenButton Text="@(Mode == DialogModes.CreateSession ? "Create Session" : "Join Session")"
+                          ButtonType="ButtonType.Submit"
+                          IsBusy="@IsBusy"/>
+        </RadzenStack>
+    </RadzenCard>
+</RadzenTemplateForm>

@@ -1,0 +1,15 @@
+﻿@using ImpowerRetro.Components.Utilities
+<div class="group-border" Style="@Constants.Styles.FlexGrowCol">
+    <RadzenButton Text="@Title" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Light" Style="position: absolute; top: -1.1em; left: 10px; cursor: default;"/>
+    @ChildContent
+</div>
+
+@code {
+
+    [Parameter]
+    public string Title { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+}

@@ -1,0 +1,75 @@
+﻿@using ImpowerRetro.Components.Model
+@using ImpowerRetro.Services
+@inject IJSUtilityService JSUtilityService
+
+@foreach (var reaction in _reactions)
+{
+    <div class="floating-reaction @(reaction.IsVisible ? "visible" : "hidden")" style="@reaction.PositionStyle">
+        <span class="emoji @reaction.AnimationClass" style="@reaction.SizeStyle">@reaction.Emoji</span>
+    </div>
+}
+
+@code {
+    private readonly List<EmojiReaction> _reactions = [];
+    private readonly Random _random = new();
+
+    [Parameter]
+    public int MaxReactions { get; set; } = 5;
+
+    [Parameter]
+    public int AnimationDuration { get; set; } = 4000;
+
+    public async Task ShowReaction(string emoji)
+    {
+        switch (emoji)
+        {
+            case "stars":
+                await JSUtilityService.PlayStarsAnimation();
+                return;
+
+            case "celebration":
+                await JSUtilityService.PlayConfettiAnimation();
+                return;
+        }
+
+        // Find an available slot or create a new one if there's room
+        var index = _reactions.FindIndex(r => !r.IsVisible);
+        if (index == -1 && _reactions.Count < MaxReactions)
+        {
+            _reactions.Add(new EmojiReaction(emoji));
+            index = _reactions.Count - 1;
+        }
+        else if (index == -1)
+        {
+            // If all slots are full, replace the oldest visible reaction
+            index = _reactions.FindIndex(r => r.IsVisible);
+            if (index == -1)
+                index = 0; // Fallback to first slot if none are visible
+        }
+
+        ShowEmoji(index, emoji);
+        await HideEmojiAfterDelay(index, AnimationDuration);
+    }
+
+    private void ShowEmoji(int index, string emoji)
+    {
+        var reaction = _reactions[index];
+        reaction.Emoji = emoji;
+        reaction.PositionStyle = $"left: {_random.Next(10, 90)}%;";
+        reaction.AnimationClass = $"float{_random.Next(1, 16)}";
+        reaction.SizeStyle = $"font-size: {_random.Next(36, 60)}px;";
+        reaction.IsVisible = true;
+        StateHasChanged();
+    }
+
+    private async Task HideEmojiAfterDelay(int index, int delay)
+    {
+        await Task.Delay(delay);
+        if (index < _reactions.Count)
+        {
+            _reactions[index].IsVisible = false;
+            StateHasChanged();
+        }
+    }
+
+}

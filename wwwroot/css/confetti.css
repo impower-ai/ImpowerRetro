@@ -1,0 +1,42 @@
+﻿.confetti {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #ffd300;
+    top: -10px; /* Start slightly above the viewport */
+    opacity: 0;
+}
+
+    .confetti-piece:nth-child(1) {
+        left: 7%;
+        transform: rotate(-40deg);
+        animation: makeItRain 1000ms infinite ease-out;
+        animation-delay: 182ms;
+        animation-duration: 1116ms;
+    }
+
+/* ... (rest of the confetti piece styles) ... */
+
+@keyframes makeItRain {
+    from {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    to {
+        transform: translateY(100vh);
+    }
+}

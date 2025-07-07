@@ -1,0 +1,79 @@
+﻿@using ImpowerRetro.Components.Model
+@using ImpowerRetro.Services
+@inject IMemoryService MemoryService
+
+<div class="chat-box-container">
+    <div class="chat-box">
+        @foreach (var item in Data)
+        {
+            <RadzenStack Orientation="Orientation.Horizontal" Style="@(IsWrapUp ? "" : "margin: 2px;")">
+                <RadzenAlert Variant="@(IsWrapUp ? Variant.Filled : Variant.Outlined)" ShowIcon="@(!IsWrapUp)" Style="@(IsWrapUp ? "margin: 4px;" : "margin: 0px; padding:0px;")" AllowClose="false">
+                    <span class="user-name" style="color: @GetColorForUser(item.UserName));">@item.UserName</span>
+                    <RedactedText Content="@item.Content" IsHidden="@(IsHidden && !IsWrapUp)"/>
+                </RadzenAlert>
+                @if (!IsWrapUp && IsOwner && item.UserName != MemoryService.UserInfo.UserName)
+                {
+                    <RadzenButton Size="ButtonSize.ExtraSmall" Variant="Variant.Outlined" Style="width: 50px;" Icon="forward" Click="() => CopyAsNote(item)"/>
+                }
+            </RadzenStack>
+        }
+    </div>
+</div>
+
+<style>
+    .chat-box-container {
+        height: 100%;
+        max-height: 400px; /* Adjust this value as needed */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-box {
+        height: 100%;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-name {
+        font-weight: bold;
+        margin-right: 5px;
+    }
+</style>
+
+@code {
+
+    [Parameter]
+    public IEnumerable<UserInput> Data { get; set; }
+
+    [Parameter]
+    public Action<UserInput> CopyAsNoteFunc { get; set; }
+
+    [Parameter]
+    public bool IsWrapUp { get; set; }
+
+    [Parameter]
+    public bool IsHidden { get; set; }
+
+    [Parameter]
+    public bool IsOwner { get; set; }
+
+    private readonly Dictionary<string, string> _userColors = new();
+    private readonly Random _random = new();
+
+    private string GetColorForUser(string userName)
+    {
+        if (!_userColors.TryGetValue(userName, out var color))
+        {
+            color = $"rgb({_random.Next(100, 256)}, {_random.Next(100, 256)}, {_random.Next(100, 256)})";
+            _userColors[userName] = color;
+        }
+
+        return color;
+    }
+
+    private void CopyAsNote(UserInput item)
+    {
+        CopyAsNoteFunc?.Invoke(item);
+    }
+}

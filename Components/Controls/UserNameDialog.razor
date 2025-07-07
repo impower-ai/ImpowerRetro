@@ -1,0 +1,35 @@
+﻿@using ImpowerRetro.Components.Model
+@using ImpowerRetro.Services
+@inject DialogService DialogService
+@inject IMemoryService MemoryService
+
+<RadzenTemplateForm TItem="@UserInfo" Data="@MemoryService.UserInfo" Submit="@OnSubmit" InvalidSubmit="@OnInvalidSubmit">
+    <RadzenStack>
+        <RadzenFormField Text="Your Name">
+            <RadzenTextBox Name="txtUserName" @bind-Value="@MemoryService.UserInfo.UserName"/>
+            <RadzenRequiredValidator Component="txtUserName" Text="" Style="position: absolute"/>
+        </RadzenFormField>
+        <div class="rz-text-align-center">
+            <RadzenCheckBox Name="chkRemember" @bind-Value="@Remember"/>
+            <RadzenLabel Component="chkRemember" Text="Remember Name"/>
+        </div>
+        <RadzenButton Text="Join Session" ButtonType="ButtonType.Submit"/>
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private bool Remember { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        Remember = !string.IsNullOrWhiteSpace(MemoryService.UserInfo?.UserName);
+    }
+
+    private void OnSubmit()
+    {
+        DialogService.Close(Remember);
+    }
+
+    private void OnInvalidSubmit() { }
+}

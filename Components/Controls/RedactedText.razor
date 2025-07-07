@@ -1,0 +1,41 @@
+﻿@inject IJSRuntime JSRuntime
+
+<span class="redacted"
+      @ref="_textElement" style="opacity: 0; transition: opacity 0.3s;">
+    @Content
+</span>
+
+@code
+{
+    [Parameter]
+    public string Content { get; set; }
+
+    [Parameter]
+    public bool IsHidden { get; set; }
+
+    private ElementReference _textElement;
+    private bool _isInitialized;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _isInitialized = true;
+            await UpdateRedactedStyle();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_isInitialized)
+            await UpdateRedactedStyle();
+    }
+
+    private async Task UpdateRedactedStyle()
+    {
+        if (!_isInitialized)
+            return;
+
+        await JSRuntime.InvokeVoidAsync("updateRedactedStyle", _textElement, IsHidden);
+    }
+}

@@ -1,0 +1,66 @@
+@using ImpowerRetro.Services
+@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject ISessionService SessionService
+@inject IJSUtilityService JSUtilityService
+@inject IMemoryService MemoryService
+
+<style>
+    :root {
+        /* Primary color and variations */
+        --rz-primary: @_primaryColor;
+        --rz-primary-light: color-mix(in srgb, @_primaryColor 80%, white 20%);
+        --rz-primary-lighter: @(_primaryColor)20; /* 20 = 12% opacity in hex */
+        --rz-primary-dark: color-mix(in srgb, @_primaryColor 85%, black 15%);
+        --rz-primary-darker: color-mix(in srgb, @_primaryColor 75%, black 25%);
+    
+        /* Secondary color and variations */
+        --rz-secondary: @_secondaryColor;
+        --rz-secondary-light: color-mix(in srgb, @_secondaryColor 80%, white 20%);
+        --rz-secondary-lighter: @(_secondaryColor)20; /* 20 = 12% opacity in hex */
+        --rz-secondary-dark: color-mix(in srgb, @_secondaryColor 85%, black 15%);
+        --rz-secondary-darker: color-mix(in srgb, @_secondaryColor 75%, black 25%);
+    
+        /* Custom theme colors for consistent text styling */
+        --secondary-text-color: @_primaryColor;
+    
+        /* Additional UI colors that use primary color */
+        --rz-info: @_primaryColor;
+        --rz-info-dark: color-mix(in srgb, @_primaryColor 85%, black 15%);
+        --rz-link-color: @_primaryColor;
+        --rz-link-hover-color: color-mix(in srgb, @_primaryColor 85%, black 15%);
+        --rz-steps-number-selected-background: @_primaryColor;
+        --rz-steps-title-selected-color: @_primaryColor;
+        --rz-on-primary-lighter: var(--rz-on-base-dark);
+        --rz-primary-lighter: var(--rz-on-base-light);
+    
+        /* Background gradient */
+        --gradient-start: @_gradientStart;
+        --gradient-end: @_gradientEnd;
+    }
+
+    /* Apply background gradient to body */
+    body { 
+        background: linear-gradient(135deg, @_gradientStart 0%, @_gradientEnd 100%) !important; 
+    }
+
+    /* Tablist styling */
+    ul[role='tablist'] {
+        background-color: var(--rz-body-background-color);
+        padding: 10px;
+        border-radius: 4px;
+    }
+</style>
+
+<RadzenComponents/>
+<RadzenDialog/>
+<RadzenLayout style="grid-template-areas: 'rz-sidebar rz-header' 'rz-sidebar rz-body';">
+    <RadzenBody>
+        <RadzenRow class="rz-mx-auto rz-px-4 rz-pt-2 rz-pt-md-4 rz-pt-lg-6 rz-pt-xl-12 rz-pb-2 rz-pb-lg-12" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Style="max-width: 1440px;">
+            <RadzenColumn Size="12">
+                @Body
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenBody>
+</RadzenLayout>
